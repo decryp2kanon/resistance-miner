@@ -191,7 +191,7 @@ extern void diff_to_target(uint32_t *target, double diff);
 struct stratum_job {
 	char *job_id;
 	unsigned char prevhash[32];
-	unsigned char finalhash[32];
+	// unsigned char finalhash[32];
 	size_t coinbase_size;
 	unsigned char *coinbase;
 	unsigned char *xnonce2;

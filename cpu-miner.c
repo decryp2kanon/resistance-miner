@@ -259,7 +259,8 @@ static struct option const options[] = {
 };
 
 struct work {
-	uint32_t data[35];
+	// uint32_t data[35];
+	uint32_t data[32];
 	uint32_t target[8];
 
 	int height;
@@ -351,7 +352,7 @@ static bool gbt_work_decode(const json_t *val, struct work *work)
 	int i, n;
 	uint32_t version, curtime, bits;
 	uint32_t prevhash[8];
-	uint32_t finalhash[8];
+	// uint32_t finalhash[8];
 	uint32_t target[8];
 	int cbtx_size;
 	unsigned char *cbtx = NULL;
@@ -409,10 +410,10 @@ static bool gbt_work_decode(const json_t *val, struct work *work)
 		goto out;
 	}
 
-	if (unlikely(!jobj_binary(val, "finalsaplingroothash", finalhash, sizeof(finalhash)))) {
-		applog(LOG_ERR, "JSON invalid finalsaplingroothash");
-		goto out;
-	}
+	// if (unlikely(!jobj_binary(val, "finalsaplingroothash", finalhash, sizeof(finalhash)))) {
+	// 	applog(LOG_ERR, "JSON invalid finalsaplingroothash");
+	// 	goto out;
+	// }
 
 	tmp = json_object_get(val, "curtime");
 	if (!tmp || !json_is_integer(tmp)) {
@@ -626,11 +627,18 @@ static bool gbt_work_decode(const json_t *val, struct work *work)
 		work->data[8 - i] = le32dec(prevhash + i);
 	for (i = 0; i < 8; i++)
 		work->data[9 + i] = be32dec((uint32_t *)merkle_tree[0] + i);
-	for (i = 0; i < 8; i++)
-		work->data[24 - i] = le32dec(finalhash + i);
-	work->data[25] = swab32(curtime);
-	work->data[26] = le32dec(&bits);
-	memset(work->data + 27, 0x00, 32); /* 256-bit nonce */
+
+	// for (i = 0; i < 8; i++)
+	// 	work->data[24 - i] = le32dec(finalhash + i);
+	// work->data[25] = swab32(curtime);
+	// work->data[26] = le32dec(&bits);
+	// memset(work->data + 27, 0x00, 32); /* 256-bit nonce */
+
+	work->data[17] = swab32(curtime);
+	work->data[18] = le32dec(&bits);
+	memset(work->data + 19, 0x00, 52);
+	work->data[20] = 0x80000000;
+	work->data[31] = 0x00000280;
 
 	if (unlikely(!jobj_binary(val, "target", target, sizeof(target)))) {
 		applog(LOG_ERR, "JSON invalid target");
@@ -714,8 +722,11 @@ static bool submit_upstream_work(CURL *curl, struct work *work)
 		unsigned char ntime[4], nonce[4];
 		char ntimestr[9], noncestr[9], *xnonce2str, *req;
 
-		le32enc(ntime, work->data[25]);
-		le32enc(nonce, work->data[27]);
+		// le32enc(ntime, work->data[25]);
+		// le32enc(nonce, work->data[27]);
+		le32enc(ntime, work->data[17]);
+		le32enc(nonce, work->data[19]);
+
 		bin2hex(ntimestr, ntime, 4);
 		bin2hex(noncestr, nonce, 4);
 		xnonce2str = abin2hex(work->xnonce2, work->xnonce2_len);
@@ -736,20 +747,21 @@ static bool submit_upstream_work(CURL *curl, struct work *work)
 
 		for (i = 0; i < ARRAY_SIZE(work->data); i++)
 			be32enc(work->data + i, work->data[i]);
-		bin2hex(data_str, (unsigned char *)work->data, 140);
+		// bin2hex(data_str, (unsigned char *)work->data, 140);
+		bin2hex(data_str, (unsigned char *)work->data, 80);
 		if (work->workid) {
 			char *params;
 			val = json_object();
 			json_object_set_new(val, "workid", json_string(work->workid));
 			params = json_dumps(val, 0);
 			json_decref(val);
-			req = malloc(128 + 2*140 + strlen(work->txs) + strlen(params));
+			req = malloc(128 + 2*80 + strlen(work->txs) + strlen(params));
 			sprintf(req,
 				"{\"method\": \"submitblock\", \"params\": [\"%s%s\", %s], \"id\":1}\r\n",
 				data_str, work->txs, params);
 			free(params);
 		} else {
-			req = malloc(128 + 2*140 + strlen(work->txs));
+			req = malloc(128 + 2*80 + strlen(work->txs));
 			sprintf(req,
 				"{\"method\": \"submitblock\", \"params\": [\"%s%s\"], \"id\":1}\r\n",
 				data_str, work->txs);
@@ -999,9 +1011,16 @@ static bool get_work(struct thr_info *thr, struct work *work)
 	struct work *work_heap;
 
 	if (opt_benchmark) {
-		memset(work->data, 0x55, 108);
-		work->data[25] = swab32(time(NULL));
-		memset(work->data + 27, 0x00, 32); /* 256-bit nonce */
+		// memset(work->data, 0x55, 108);
+		// work->data[25] = swab32(time(NULL));
+		// memset(work->data + 27, 0x00, 32); /* 256-bit nonce */
+
+		memset(work->data, 0x55, 76);
+		work->data[17] = swab32(time(NULL));
+		memset(work->data + 19, 0x00, 52);
+		work->data[20] = 0x80000000;
+		work->data[31] = 0x00000280;
+
 		memset(work->target, 0x00, sizeof(work->target));
 		return true;
 	}
@@ -1084,23 +1103,31 @@ static void stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 	for (i = 0; i < sctx->xnonce2_size && !++sctx->job.xnonce2[i]; i++);
 
 	/* Assemble block header */
-	memset(work->data, 0, sizeof(work->data));
+	// memset(work->data, 0, sizeof(work->data));
+	memset(work->data, 0, 128);
 	work->data[0] = le32dec(sctx->job.version);
 	for (i = 0; i < 8; i++)
 		work->data[1 + i] = le32dec((uint32_t *)sctx->job.prevhash + i);
 	for (i = 0; i < 8; i++)
 		work->data[9 + i] = be32dec((uint32_t *)merkle_root + i);
-	for (i = 0; i < 8; i++)
-		work->data[17 + i] = le32dec((uint32_t *)sctx->job.finalhash + i);
-	work->data[25] = le32dec(sctx->job.ntime);
-	work->data[26] = le32dec(sctx->job.nbits);
+
+	// for (i = 0; i < 8; i++)
+		// work->data[17 + i] = le32dec((uint32_t *)sctx->job.finalhash + i);
+	// work->data[25] = le32dec(sctx->job.ntime);
+	// work->data[26] = le32dec(sctx->job.nbits);
+
+	work->data[17] = le32dec(sctx->job.ntime);
+	work->data[18] = le32dec(sctx->job.nbits);
+	work->data[20] = 0x80000000;
+	work->data[31] = 0x00000280;
 
 	pthread_mutex_unlock(&sctx->work_lock);
 
 	if (opt_debug) {
 		char *xnonce2str = abin2hex(work->xnonce2, work->xnonce2_len);
 		applog(LOG_DEBUG, "DEBUG: job_id='%s' extranonce2=%s ntime=%08x",
-		       work->job_id, xnonce2str, swab32(work->data[26]));
+		       // work->job_id, xnonce2str, swab32(work->data[26]));
+		       work->job_id, xnonce2str, swab32(work->data[17]));
 		free(xnonce2str);
 	}
 
@@ -1224,7 +1251,8 @@ static void *miner_thread(void *userdata)
 			while (time(NULL) >= g_work_time + 120)
 				sleep(1);
 			pthread_mutex_lock(&g_work_lock);
-			if (work.data[27] >= end_nonce && !memcmp(work.data, g_work.data, 108))
+			// if (work.data[27] >= end_nonce && !memcmp(work.data, g_work.data, 108))
+			if (work.data[19] >= end_nonce && !memcmp(work.data, g_work.data, 76))
 				stratum_gen_work(&stratum, &g_work);
 		} else {
 			int min_scantime = have_longpoll ? LP_SCANTIME : opt_scantime;
@@ -1232,7 +1260,8 @@ static void *miner_thread(void *userdata)
 			pthread_mutex_lock(&g_work_lock);
 			if (!have_stratum &&
 			    (time(NULL) - g_work_time >= min_scantime ||
-			     work.data[27] >= end_nonce)) {
+			     // work.data[27] >= end_nonce)) {
+			     work.data[19] >= end_nonce)) {
 				work_free(&g_work);
 				if (unlikely(!get_work(mythr, &g_work))) {
 					applog(LOG_ERR, "work retrieval failed, exiting "
@@ -1247,16 +1276,19 @@ static void *miner_thread(void *userdata)
 				continue;
 			}
 		}
-		if (memcmp(work.data, g_work.data, 108)) {
+		// if (memcmp(work.data, g_work.data, 108)) {
+		if (memcmp(work.data, g_work.data, 76)) {
 			work_free(&work);
 			work_copy(&work, &g_work);
-			work.data[27] = start_nonce;
+			// work.data[27] = start_nonce;
+			work.data[19] = start_nonce;
 			/* dare to leak this if random pool is uninitialized */
 			uint32_t seed = tv_start.tv_sec ^ tv_start.tv_usec ^ hashes_done;
 			/* the rest of 256-bit nonce */
 			memcpy(work.data + 28, random_get(&seed, sizeof(seed)), 28);
 		} else
-			work.data[27]++;
+			// work.data[27]++;
+			work.data[19]++;
 		pthread_mutex_unlock(&g_work_lock);
 		work_restart[thr_id].restart = 0;
 		
