@@ -136,7 +136,7 @@ void sha256_init(uint32_t *state);
 void sha256_transform(uint32_t *state, const uint32_t *block, int swap);
 void sha256d(unsigned char *hash, const unsigned char *data, int len);
 
-extern int scanhash_res_yespower(int thr_id, uint32_t *pdata,
+extern int scanhash_sugar_yespower(int thr_id, uint32_t *pdata,
 	const uint32_t *ptarget,
 	uint32_t max_nonce, unsigned long *hashes_done);
 

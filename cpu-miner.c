@@ -1285,7 +1285,7 @@ static void *miner_thread(void *userdata)
 		/* scan nonces for a proof-of-work hash */
 		switch (opt_algo) {
 		case ALGO_RES_YESPOWER_1_0:
-			rc = scanhash_res_yespower(thr_id, work.data, work.target,
+			rc = scanhash_sugar_yespower(thr_id, work.data, work.target,
 			                     max_nonce, &hashes_done);
 			break;
 
