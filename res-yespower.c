@@ -40,11 +40,12 @@ int scanhash_res_yespower(int thr_id, uint32_t *pdata,
 	uint32_t max_nonce, unsigned long *hashes_done)
 {
 	static const yespower_params_t params = {
+		// yespower_sugar
 		.version = YESPOWER_1_0,
-		.N = 4096,
+		.N = 2048,
 		.r = 32,
-		.pers = NULL,
-		.perslen = 0
+		.pers = (const uint8_t *)"Satoshi Nakamoto 31/Oct/2008 Proof-of-work is essentially one-CPU-one-vote",
+		.perslen = 74
 	};
 	union {
 		uint8_t u8[140];
