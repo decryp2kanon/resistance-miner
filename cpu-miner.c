@@ -109,11 +109,11 @@ struct workio_cmd {
 };
 
 enum algos {
-	ALGO_RES_YESPOWER_1_0
+	ALGO_SUGAR_YESPOWER_1_0_1
 };
 
 static const char *algo_names[] = {
-	[ALGO_RES_YESPOWER_1_0]	= "res-yespower-1.0"
+	[ALGO_SUGAR_YESPOWER_1_0_1]	= "sugar-yespower-1.0.1"
 };
 
 bool opt_debug = false;
@@ -133,7 +133,7 @@ static int opt_retries = -1;
 static int opt_fail_pause = 30;
 int opt_timeout = 0;
 static int opt_scantime = 5;
-static enum algos opt_algo = ALGO_RES_YESPOWER_1_0;
+static enum algos opt_algo = ALGO_SUGAR_YESPOWER_1_0_1;
 static int opt_n_threads;
 static int num_processors;
 static char *rpc_url;
@@ -174,7 +174,7 @@ static char const usage[] = "\
 Usage: " PROGRAM_NAME " [OPTIONS]\n\
 Options:\n\
   -a, --algo=ALGO       specify the algorithm to use\n\
-                          res-yespower-1.0 (default)\n\
+                          sugar-yespower-1.0.1 (default)\n\
   -o, --url=URL         URL of mining server\n\
   -O, --userpass=U:P    username:password pair for mining server\n\
   -u, --user=USERNAME   username for mining server\n\
@@ -1269,7 +1269,7 @@ static void *miner_thread(void *userdata)
 		max64 *= thr_hashrates[thr_id];
 		if (max64 <= 0) {
 			switch (opt_algo) {
-			case ALGO_RES_YESPOWER_1_0:
+			case ALGO_SUGAR_YESPOWER_1_0_1:
 				max64 = 499;
 				break;
 			}
@@ -1284,7 +1284,7 @@ static void *miner_thread(void *userdata)
 
 		/* scan nonces for a proof-of-work hash */
 		switch (opt_algo) {
-		case ALGO_RES_YESPOWER_1_0:
+		case ALGO_SUGAR_YESPOWER_1_0_1:
 			rc = scanhash_sugar_yespower(thr_id, work.data, work.target,
 			                     max_nonce, &hashes_done);
 			break;
