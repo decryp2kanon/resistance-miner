@@ -113,7 +113,7 @@ enum algos {
 };
 
 static const char *algo_names[] = {
-	[ALGO_SUGAR_YESPOWER_1_0_1]	= "sugar-yespower-1.0.1"
+	[ALGO_SUGAR_YESPOWER_1_0_1]	= "YespowerSugar-1.0.1"
 };
 
 bool opt_debug = false;
@@ -174,7 +174,7 @@ static char const usage[] = "\
 Usage: " PROGRAM_NAME " [OPTIONS]\n\
 Options:\n\
   -a, --algo=ALGO       specify the algorithm to use\n\
-                          sugar-yespower-1.0.1 (default)\n\
+                          YespowerSugar-1.0.1 (default)\n\
   -o, --url=URL         URL of mining server\n\
   -O, --userpass=U:P    username:password pair for mining server\n\
   -u, --user=USERNAME   username for mining server\n\
