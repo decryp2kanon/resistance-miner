@@ -1,6 +1,6 @@
 
-minerd
-minerd.exe
+sugarmaker
+sugarmaker.exe
 *.o
 
 autom4te.cache

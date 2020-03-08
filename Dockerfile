@@ -19,4 +19,4 @@ RUN             cd cpuminer && \
                 make
 
 WORKDIR         /cpuminer
-ENTRYPOINT      ["./minerd"]
+ENTRYPOINT      ["./sugarmaker"]

@@ -41,11 +41,11 @@ Basic Windows build instructions, using MinGW:
 		LIBCURL='-lcurldll' ./configure
 		make
 
-Usage instructions:  Run "minerd --help" to see options.
+Usage instructions:  Run "sugarmaker --help" to see options.
 
 You can solo-mine using these options:
 
-	./minerd -o http://127.0.0.1:8132 -u user -p putyourrpcpasswordhere
+	./sugarmaker -o http://127.0.0.1:8132 -u user -p putyourrpcpasswordhere
 
 (Omit the leading "./" if you're on Windows.)  For the above to work, you need
 a fully-synced node running locally and with RPC username/password configured,

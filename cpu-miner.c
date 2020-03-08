@@ -46,7 +46,7 @@
 static int have_cpuinfo;
 #endif
 
-#define PROGRAM_NAME		"minerd"
+#define PROGRAM_NAME		"sugarmaker"
 #define LP_SCANTIME		60
 
 #ifdef __linux /* Linux specific policy and affinity management */

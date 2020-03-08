@@ -10,16 +10,16 @@ EXTRA_DIST	= example-cfg.json
 
 SUBDIRS		= compat
 
-bin_PROGRAMS	= minerd
+bin_PROGRAMS	= sugarmaker
 
-dist_man_MANS	= minerd.1
+dist_man_MANS	= sugarmaker.1
 
-minerd_SOURCES	= elist.h miner.h compat.h \
+sugarmaker_SOURCES	= elist.h miner.h compat.h \
 		  cpu-miner.c util.c \
 		  sha2.c \
 		  random.c cpuinfo.c \
 		  yespower/sha256.c yespower/yespower-opt.c res-yespower.c
-minerd_LDFLAGS	= $(PTHREAD_FLAGS)
-minerd_LDADD	= @LIBCURL@ @JANSSON_LIBS@ @PTHREAD_LIBS@ @WS2_LIBS@
-minerd_CPPFLAGS	= $(PTHREAD_FLAGS) @CPPFLAGS@ $(JANSSON_INCLUDES)
+sugarmaker_LDFLAGS	= $(PTHREAD_FLAGS)
+sugarmaker_LDADD	= @LIBCURL@ @JANSSON_LIBS@ @PTHREAD_LIBS@ @WS2_LIBS@
+sugarmaker_CPPFLAGS	= $(PTHREAD_FLAGS) @CPPFLAGS@ $(JANSSON_INCLUDES)
 
